@@ -29,11 +29,16 @@ OtakuHub is an anime watch party platform built for a course project. It include
 
 ```text
 assets/              Shared image assets
+docs/                API and project documentation
 otakuhub_flask/      Flask + MySQL full-stack version
 index.html           Static frontend entry
 styles.css           Static frontend styles
 app.js               Static frontend logic
 ```
+
+## Documentation
+
+- [API Reference](docs/API_REFERENCE.md)
 
 ## Run The Flask Version
 
