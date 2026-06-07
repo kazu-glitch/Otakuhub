@@ -4,3 +4,12 @@ screenshots/
 __pycache__/
 *.pyc
 .env
+.merge_sources/
+otakuhub_clean/
+eng.traineddata
+exam_*/
+exam_*.txt
+ocr_*
+extract_exam_frames.js
+make_exam_pdf*.py
+ST5039CMD_*.pdf
