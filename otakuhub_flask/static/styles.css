@@ -1,5 +1,15 @@
+@font-face {
+  font-family: "CyberTechno";
+  src: url("assets/fonts/CyberTechno.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   color-scheme: dark;
+  --font-display: "CyberTechno", "Segoe UI", system-ui, sans-serif;
+  --font-body: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --bg: #050505;
   --surface: #101010;
   --surface-2: #181818;
@@ -37,7 +47,8 @@ body {
   min-height: 100vh;
   background: var(--bg);
   color: var(--text);
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-body);
+  font-size: 16.5px;
 }
 
 button,
@@ -95,6 +106,8 @@ img {
   background: linear-gradient(135deg, var(--primary), var(--primary-2));
   color: #151000;
   font-weight: 800;
+  font-family: var(--font-display);
+  font-size: 1.08rem;
 }
 
 .brand strong,
@@ -193,10 +206,11 @@ img {
 .hero-copy h2,
 .profile-card h2 {
   margin: 0;
+  font-family: var(--font-display);
 }
 
 .topbar h1 {
-  font-size: clamp(1.7rem, 3vw, 2.5rem);
+  font-size: clamp(1.85rem, 3vw, 2.65rem);
 }
 
 .eyebrow {
@@ -326,7 +340,7 @@ img {
 
 .hero-copy h2 {
   max-width: 760px;
-  font-size: clamp(2rem, 5vw, 4.8rem);
+  font-size: clamp(2.15rem, 5vw, 5rem);
   line-height: 0.98;
 }
 
