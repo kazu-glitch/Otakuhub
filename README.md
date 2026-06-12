@@ -13,7 +13,7 @@ OtakuHub is an anime watch party platform built for a course project. It include
 - Favorite anime lists
 - User profile section
 - Admin dashboard
-- Dark black/yellow theme
+- Warm orange/yellow theme
 - Flask REST API
 - MySQL schema and seed data
 
