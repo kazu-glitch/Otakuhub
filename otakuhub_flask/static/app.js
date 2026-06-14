@@ -203,7 +203,7 @@ function roomCard(room, index, full) {
           <span class="badge">${room.viewers || Math.ceil(room.capacity * 0.64)}/${room.capacity} watching</span>
         </div>
         <h4>${room.name}</h4>
-        <p>${room.anime} · Episode ${room.episode}</p>
+        <p>${room.anime} - Episode ${room.episode}</p>
         ${full ? `<div class="reaction-row">${reactionButtons}</div>
         <div class="card-actions">
           <button type="button" data-edit-room="${room.id}">Edit</button>
