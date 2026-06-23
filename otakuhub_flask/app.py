@@ -1,4 +1,5 @@
 import json
+import os
 import time
 import uuid
 from datetime import datetime, timezone
@@ -9,6 +10,14 @@ from mysql.connector import Error
 from db import execute, fetch_all, fetch_one, get_connection
 
 app = Flask(__name__)
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret-key")
+app.config["JSON_SORT_KEYS"] = False
+
+
+def create_app(test_config=None):
+    if test_config:
+        app.config.update(test_config)
+    return app
 
 NEWS = [
     {
