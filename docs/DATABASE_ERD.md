@@ -8,6 +8,8 @@ erDiagram
     varchar id PK
     varchar display_name
     varchar username
+    varchar email
+    varchar password_hash
     text bio
     varchar avatar_url
     enum role
@@ -74,4 +76,5 @@ erDiagram
 - `anime_lists` stores tracking information such as total episodes, watched episodes, rating, favorite status, genre, studio, and poster URL.
 - `comments.target` can refer to an anime title or watch room name.
 - `schedules` powers the upcoming anime calendar and countdown tracker.
-- `users` currently stores the demo profile and can support future login/signup work.
+- `users` stores profile data, unique login identifiers, hashed passwords, and roles for session management.
+- `username` and `email` are unique so registration can reject duplicate accounts.

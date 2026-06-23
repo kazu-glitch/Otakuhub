@@ -2,13 +2,14 @@
 
 Full-stack anime watch party platform with a Flask API, MySQL database, and the OtakuHub frontend served from Flask. The demo data uses Naruto, One Piece, Attack on Titan, and Hunter x Hunter poster URLs from MyAnimeList data returned by Jikan, plus genre and studio metadata for richer anime cards.
 
-The Flask frontend uses the same warm orange/yellow UI theme as the static dashboard.
+The Flask frontend uses Jinja2 templates, HTML, CSS, and JavaScript for a responsive dashboard with authentication, sessions, image uploads, Jikan search, and MySQL persistence.
 
 ## Folder Structure
 
 ```text
 otakuhub_flask/
   app.py                 Flask app and REST API routes
+  auth.py                User registration, login, logout, and session routes
   db.py                  MySQL connection helpers
   init_db.py             Creates and seeds the database
   requirements.txt       Python dependencies
@@ -22,6 +23,8 @@ otakuhub_flask/
     assets/              Local PNG artwork
   templates/
     index.html           Flask-rendered page
+  tests/
+    test_auth.py         Authentication and session tests
 ```
 
 ## Setup
@@ -74,10 +77,21 @@ Open:
 http://127.0.0.1:5000
 ```
 
+Demo login:
+
+```text
+mika@example.com / otakuhub123
+```
+
 ## API Routes
 
 ```text
 GET    /api/health
+GET    /api/csrf-token
+GET    /api/auth/me
+POST   /api/auth/register
+POST   /api/auth/login
+POST   /api/auth/logout
 GET    /api/state
 PUT    /api/state
 
@@ -105,6 +119,16 @@ GET    /api/news
 GET    /api/users
 GET    /api/users/<user_id>
 GET    /api/profile
+POST   /api/uploads
+GET    /api/jikan/search
 ```
 
-The frontend loads from `/api/state` and saves dashboard changes back to MySQL through `PUT /api/state`.
+The frontend loads from `/api/state` and saves dashboard changes back to MySQL through `PUT /api/state`. Data-changing API requests require a CSRF token and a logged-in session, except for login/register/logout routes.
+
+## Tests
+
+```bash
+pytest
+```
+
+The tests mock database calls for auth flows, so they can run without a live MySQL server.

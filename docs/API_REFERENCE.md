@@ -39,6 +39,31 @@ PUT /api/state
 
 Replaces the demo app state in MySQL. The frontend uses this route when saving dashboard changes.
 
+Write requests under `/api/` require a valid `X-CSRFToken` header. Data-changing application routes also require a logged-in user session.
+
+## Authentication And Sessions
+
+```http
+GET  /api/csrf-token
+GET  /api/auth/me
+POST /api/auth/register
+POST /api/auth/login
+POST /api/auth/logout
+```
+
+Registration stores a hashed password in MySQL and starts a Flask session. Login accepts either username or email. Logout clears the current session.
+
+Example login body:
+
+```json
+{
+  "identifier": "mika@example.com",
+  "password": "otakuhub123"
+}
+```
+
+The demo account is `mika@example.com` / `otakuhub123`.
+
 ## Users And Profile
 
 ```http
@@ -136,3 +161,12 @@ GET /api/news
 ```
 
 Returns static anime news items used by the dashboard news panel.
+
+## Images And Anime Search
+
+```http
+POST /api/uploads
+GET  /api/jikan/search?q=naruto
+```
+
+Uploads accept JPG, PNG, GIF, and WebP files up to 8 MB. Jikan search fetches safe anime metadata and caches results briefly to reduce external API calls.

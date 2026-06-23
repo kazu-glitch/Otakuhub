@@ -12,6 +12,9 @@ OtakuHub is an anime watch party platform built for a course project. It include
 - Anime-themed reactions
 - Favorite anime lists
 - User profile section
+- User registration and login
+- Flask session management
+- CSRF protection for API writes
 - Admin dashboard
 - Warm orange/yellow theme
 - Flask REST API
@@ -40,6 +43,8 @@ app.js               Static frontend logic
 
 - [API Reference](docs/API_REFERENCE.md)
 - [Database ERD](docs/DATABASE_ERD.md)
+- [Security Architecture](docs/SECURITY_ARCHITECTURE.md)
+- [Testing Notes](docs/TESTING.md)
 
 ## Run The Flask Version
 
@@ -57,6 +62,20 @@ Open:
 
 ```text
 http://127.0.0.1:5000
+```
+
+Demo login:
+
+```text
+mika@example.com / otakuhub123
+```
+
+## Demonstration Video
+
+Add your unlisted YouTube or Google Drive video link here before submission:
+
+```text
+TODO: paste demonstration video link
 ```
 
 ## Demo Anime

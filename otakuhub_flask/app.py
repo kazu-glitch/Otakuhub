@@ -1,17 +1,29 @@
 import json
 import os
+import secrets
 import time
-import uuid
+from pathlib import Path
 from datetime import datetime, timezone
+from urllib.error import URLError
+from urllib.parse import quote
+from urllib.request import Request, urlopen
+import uuid
 
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, session
 from mysql.connector import Error
+from werkzeug.utils import secure_filename
 
+from auth import auth_bp, current_user
 from db import execute, fetch_all, fetch_one, get_connection
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret-key")
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", secrets.token_hex(32))
+app.config["MAX_CONTENT_LENGTH"] = 8 * 1024 * 1024
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_SECURE"] = os.getenv("SESSION_COOKIE_SECURE", "0") == "1"
 app.config["JSON_SORT_KEYS"] = False
+app.register_blueprint(auth_bp)
 SERVICE_NAME = "otakuhub-flask"
 
 
@@ -19,6 +31,12 @@ def create_app(test_config=None):
     if test_config:
         app.config.update(test_config)
     return app
+
+UPLOAD_FOLDER = Path(app.root_path) / "static" / "uploads"
+UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
+ALLOWED_IMAGE_EXTENSIONS = {"jpg", "jpeg", "png", "gif", "webp"}
+JIKAN_CACHE = {}
+JIKAN_TTL = 900
 
 NEWS = [
     {
@@ -46,6 +64,35 @@ def ok(payload=None, status=200):
 
 def json_body():
     return request.get_json(force=True) or {}
+
+
+def is_allowed_image(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_IMAGE_EXTENSIONS
+
+
+def csrf_token():
+    token = session.get("csrf_token")
+    if not token:
+        token = secrets.token_urlsafe(32)
+        session["csrf_token"] = token
+    return token
+
+
+@app.before_request
+def protect_api_writes():
+    if request.method not in {"POST", "PUT", "PATCH", "DELETE"}:
+        return None
+    if not request.path.startswith("/api/") or request.path == "/api/csrf-token":
+        return None
+
+    token = request.headers.get("X-CSRFToken") or request.headers.get("X-CSRF-Token")
+    if token and secrets.compare_digest(token, csrf_token()):
+        if request.path.startswith("/api/auth/"):
+            return None
+        if current_user():
+            return None
+        return ok({"error": "Login required for this action"}, 401)
+    return ok({"error": "CSRF token missing or invalid"}, 403)
 
 
 def parse_reactions(value):
@@ -149,6 +196,65 @@ def health():
 @app.get("/api/news")
 def get_news():
     return ok(NEWS)
+
+
+@app.get("/api/csrf-token")
+def get_csrf_token():
+    return ok({"csrf_token": csrf_token()})
+
+
+@app.post("/api/uploads")
+def upload_image():
+    image = request.files.get("image")
+    if not image or not image.filename:
+        return ok({"error": "No image selected"}, 400)
+    if not is_allowed_image(image.filename):
+        return ok({"error": "Use a JPG, PNG, GIF, or WebP image"}, 400)
+
+    extension = image.filename.rsplit(".", 1)[1].lower()
+    safe_name = secure_filename(image.filename.rsplit(".", 1)[0]) or "upload"
+    filename = f"{safe_name}-{uuid.uuid4().hex}.{extension}"
+    image.save(UPLOAD_FOLDER / filename)
+    return ok({"url": f"/static/uploads/{filename}", "filename": filename}, 201)
+
+
+@app.get("/api/jikan/search")
+def search_jikan():
+    query = request.args.get("q", "").strip()
+    if len(query) < 2:
+        return ok([])
+
+    cache_key = query.lower()
+    cached = JIKAN_CACHE.get(cache_key)
+    if cached and time.time() - cached["created_at"] < JIKAN_TTL:
+        return ok(cached["items"])
+
+    url = f"https://api.jikan.moe/v4/anime?q={quote(query)}&limit=8&sfw=true"
+    try:
+        req = Request(url, headers={"User-Agent": "OtakuHub/1.0"})
+        with urlopen(req, timeout=8) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+    except (OSError, URLError, json.JSONDecodeError) as error:
+        return ok({"error": "Jikan API unavailable", "detail": str(error)}, 502)
+
+    items = []
+    for anime in payload.get("data", []):
+        images = anime.get("images", {}).get("jpg", {})
+        titles = anime.get("titles", [])
+        english_title = next((item.get("title") for item in titles if item.get("type") == "English"), None)
+        items.append({
+            "title": english_title or anime.get("title_english") or anime.get("title"),
+            "episodes": anime.get("episodes") or 1,
+            "rating": anime.get("score") or 7.0,
+            "status": "planned",
+            "genre": ", ".join(genre.get("name") for genre in anime.get("genres", [])[:2]) or "Anime",
+            "studio": ", ".join(studio.get("name") for studio in anime.get("studios", [])[:2]) or "Studio TBA",
+            "imageUrl": images.get("large_image_url") or images.get("image_url"),
+            "malUrl": anime.get("url"),
+        })
+
+    JIKAN_CACHE[cache_key] = {"created_at": time.time(), "items": items}
+    return ok(items)
 
 
 @app.get("/api/users")
