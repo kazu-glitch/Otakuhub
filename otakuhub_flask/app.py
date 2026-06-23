@@ -12,6 +12,7 @@ from db import execute, fetch_all, fetch_one, get_connection
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret-key")
 app.config["JSON_SORT_KEYS"] = False
+SERVICE_NAME = "otakuhub-flask"
 
 
 def create_app(test_config=None):
@@ -139,7 +140,7 @@ def health():
         connection.ping(reconnect=True)
     return ok({
         "status": "ok",
-        "service": "otakuhub-flask",
+        "service": SERVICE_NAME,
         "database": "connected",
         "checkedAt": datetime.now(timezone.utc).isoformat(),
     })
