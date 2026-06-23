@@ -3,7 +3,12 @@ screenshots/
 .venv/
 __pycache__/
 *.pyc
+.pytest_cache/
 .env
+*.log
+.DS_Store
+Thumbs.db
+otakuhub_flask/static/uploads/
 .merge_sources/
 otakuhub_clean/
 eng.traineddata
