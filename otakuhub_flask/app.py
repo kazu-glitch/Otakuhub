@@ -43,6 +43,10 @@ def ok(payload=None, status=200):
     return jsonify(payload if payload is not None else {"ok": True}), status
 
 
+def json_body():
+    return request.get_json(force=True) or {}
+
+
 def parse_reactions(value):
     if value is None:
         return {}
@@ -186,7 +190,7 @@ def get_state():
 
 @app.put("/api/state")
 def replace_state():
-    data = request.get_json(force=True)
+    data = json_body()
     rooms = data.get("rooms", [])
     anime = data.get("anime", [])
     comments = data.get("comments", [])
@@ -292,7 +296,7 @@ def list_rooms():
 
 @app.post("/api/rooms")
 def create_room():
-    data = request.get_json(force=True)
+    data = json_body()
     room_id = data.get("id", new_id("room"))
     execute(
         """
@@ -316,7 +320,7 @@ def create_room():
 
 @app.put("/api/rooms/<room_id>")
 def update_room(room_id):
-    data = request.get_json(force=True)
+    data = json_body()
     execute(
         """
         UPDATE watch_rooms
@@ -351,7 +355,7 @@ def list_anime():
 
 @app.post("/api/anime")
 def create_anime():
-    data = request.get_json(force=True)
+    data = json_body()
     anime_id = data.get("id", new_id("anime"))
     execute(
         """
@@ -365,7 +369,7 @@ def create_anime():
 
 @app.put("/api/anime/<anime_id>")
 def update_anime(anime_id):
-    data = request.get_json(force=True)
+    data = json_body()
     execute(
         """
         UPDATE anime_lists
@@ -390,7 +394,7 @@ def list_comments():
 
 @app.post("/api/comments")
 def create_comment():
-    data = request.get_json(force=True)
+    data = json_body()
     comment_id = data.get("id", new_id("comment"))
     execute(
         """
@@ -404,7 +408,7 @@ def create_comment():
 
 @app.put("/api/comments/<comment_id>")
 def update_comment(comment_id):
-    data = request.get_json(force=True)
+    data = json_body()
     execute(
         """
         UPDATE comments
@@ -429,7 +433,7 @@ def list_schedules():
 
 @app.post("/api/schedules")
 def create_schedule():
-    data = request.get_json(force=True)
+    data = json_body()
     schedule_id = data.get("id", new_id("schedule"))
     execute(
         """
@@ -443,7 +447,7 @@ def create_schedule():
 
 @app.put("/api/schedules/<schedule_id>")
 def update_schedule(schedule_id):
-    data = request.get_json(force=True)
+    data = json_body()
     execute(
         """
         UPDATE schedules
